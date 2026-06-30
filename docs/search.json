@@ -1,0 +1,72 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Aplicações de Análise Fatorial Bayesiana",
+    "section": "",
+    "text": "1 Sobre\nEste é o material auxiliar do seminário de Tópicos Especiais em Estatística: Estatística Multivariada (DEST-UFMG, 2026/1, EST 865). O tema é análise fatorial Bayesiana, em específico algumas aplicações vistas na literatura. Este quarto book está dividido da seguinte forma:\nUsaremos dados do INMET como um exemplo motivador ao longo do texto.",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Sobre</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#motivação",
+    "href": "index.html#motivação",
+    "title": "Aplicações de Análise Fatorial Bayesiana",
+    "section": "1.1 Motivação",
+    "text": "1.1 Motivação\nPorquê fazer análise fatorial do jeito Bayesiano?\n\nporquê é o jeito correto de fazer estatística;\nA inclusão de dependências temporais/espaciais em cargas e fatores ocorre naturalmente via prioris;\nA regularização de coeficientes também pode ser feita via prioris informativas, o que permite um modelo que faz seleção de fatores;\nExtensão para um modelo de regressão e análise fatorial.",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Sobre</span>"
+    ]
+  },
+  {
+    "objectID": "qmd/basics.html",
+    "href": "qmd/basics.html",
+    "title": "2  Modelos básicos",
+    "section": "",
+    "text": "2.1 Análise fatorial exploratória\nNo modelo de análise fatorial com apenas um fator, assumimos que\n\\[X = \\alpha \\lambda + \\epsilon\\] ou, equivalentemente,\n\\[X_{i,j}|\\{\\alpha, \\lambda, \\sigma^2\\} \\sim \\text{Normal}(\\alpha_i \\lambda_j, \\sigma_i^2),\\]\nem que:",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Modelos básicos</span>"
+    ]
+  },
+  {
+    "objectID": "qmd/basics.html#análise-fatorial-exploratória",
+    "href": "qmd/basics.html#análise-fatorial-exploratória",
+    "title": "2  Modelos básicos",
+    "section": "",
+    "text": "\\(X \\in \\mathbb R^{n \\times m}\\) é a matriz de observações;\n\\(\\alpha \\in \\mathbb R^n\\) é a matriz das cargas;\n\\(\\lambda \\in \\mathbb R^m\\) é a matriz de escores;\n\\(\\epsilon \\in \\mathbb R^{n \\times m}\\) é a componente estocástica do modelo, em que assumimos que \\(\\epsilon_{i,j} \\sim N(0, \\sigma^2_i)\\) independentes e escrevemos \\(\\sigma^2 = (\\sigma^2_1, \\dots, \\sigma^2_n)'\\).\n\n\n\n\n\n\n\nNota\n\n\n\nEmbora estejamos assumindo normalidade nos exemplos dessa seção, outras distribuições podem ser usadas para escrever a verossimilhança do nosso modelo. Nesse sentido (e analogamente aos MLGs), poderíamos ter algo do tipo\n\\[X_{i,j}|\\{\\alpha, \\lambda, \\sigma^2\\} \\sim FE\\Bigr(\\ g(\\alpha_i \\lambda_j), \\ \\phi_i\\ \\Bigr),\\]\nem que \\(FE\\) é alguma distribuição da família exponencial, \\(\\phi_i\\) é um parâmetro de precisão/escala e \\(g\\) uma função de ligação que faça sentido.\n\n\n\nIdentificabilidade\nAssim como seu análogo frequentista, o modelo acima padece de falta de identificabilidade. Isso ocorre pois \\(\\alpha\\lambda = \\alpha QQ^\\top\\lambda\\) para qualquer \\(Q\\) ortogonal. Um exemplo de como isso pode afetar a estimação da distribuição posterior é mostrado abaixo.\ndata {\n  int n;\n  vector[n] x;\n  real mu_b;\n}\nparameters {\n  real&lt;lower=0&gt; a;\n  real b;\n}\nmodel {\n  x ~ normal(a*b, 1);\n  a ~ normal(0, 1);\n  b ~ normal(mu_b, 1);\n}\n\nCódigo\nmod = readRDS(here::here(\"modIdent.rds\"))\n\nset.seed(12345)\n\nx = rnorm(100, 1)\n\nout = capture.output({\n  rstan::sampling(mod, data = list(n = length(x), x = x, mu_b = 0), chains = 1, seed = 12345) |&gt;\n    rstan::extract(pars = c(\"a\", \"b\"), permuted = FALSE) |&gt;\n    drop() |&gt;\n    plot(main = \"posterior a partir de prioris iguais\")\n  })\nout = capture.output({\n  rstan::sampling(mod, data = list(n = length(x), x = x, mu_b = 100), chains = 1, seed = 12345) |&gt;\n    rstan::extract(pars = c(\"a\", \"b\"), permuted = FALSE) |&gt;\n    drop() |&gt;\n    plot(main = \"posterior a partir de prioris informativas\")\n  })\n\n\n\n\n\n\n\n\n\n\n\nNo simples exemplo acima não tivemos problema de convergência das cadeias\nEmbora o modelo descrito acima\n\n\n\n\n\n\nCuidado\\(a\\) ou \\(-a\\)?\n\n\n\nEmbora seja possível haver dados com cargas positivos e negativas em um mesmo grupo, em modelos com dados longitudinais naturais. Isso está associado a uma espécie de relação suave entre as variáveis.\nLembre-se que uma carga positiva indica uma correlação positiva entre a variável e seu fator.\n\n\nAssim, assumimos as seguintes prioris:\n\\[\n\\alpha \\sim N_n(0, V_\\alpha),\\\\\n\\] \\[\n\\lambda \\sim N_m(0, v_\\lambda),\\\\\n\\] \\[\n\\sigma^2 \\sim Gama_n(\\epsilon, \\epsilon),\n\\] em que \\(v_\\lambda &lt;&lt; V_\\alpha\\) e \\(\\epsilon\\) é um número positivo pequeno, de modo a garantir falta de informação.\n\n\nO papel da heterocedasticidade\nA heterocedasticidade pode ser uma ferramenta valiosa para a avaliação da qualidade do ajuste do modelo. Na medida em que \\(\\sigma_i\\) é o desvio padrão de \\(X_{i,j}\\) em relação a \\(\\alpha_i\\lambda_j\\) (que é a média estimada levando em consideração todas as variáveis), interpretamos \\(\\sigma_i\\) como uma espécie de variância residual, uma variância dos dados não explicada pelo modelo de análise fatorial.",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Modelos básicos</span>"
+    ]
+  },
+  {
+    "objectID": "qmd/basics.html#modelos-confirmatório-e-semi-confirmatório",
+    "href": "qmd/basics.html#modelos-confirmatório-e-semi-confirmatório",
+    "title": "2  Modelos básicos",
+    "section": "2.2 Modelos confirmatório e semi-confirmatório",
+    "text": "2.2 Modelos confirmatório e semi-confirmatório\nCaso desejemos adicionar mais de um fator ao nosso modelo, uma extensão natural do modelo confirmatório é feita com as seguintes alterações (considerando \\(r\\) fatores).\n\n\\(\\alpha \\in \\mathbb R^{n \\times r}\\) é a matriz das cargas;\n\\(\\lambda \\in \\mathbb R ^{r \\times m}\\) é a matriz de escores.\n\nNote também que, agora, a média da variável resposta é decomposta efeitos fatoriais ponderados pelas cargas.\n\\[\n\\begin{aligned}\n\\text{E}\\bigr[{X_{i,j} \\mid \\alpha, \\lambda, \\sigma^2}\\bigr] &= (\\alpha\\lambda)_{i,j} \\\\\n&= \\sum_{\\delta=1}^r \\alpha_{i,\\delta}\\lambda_{\\delta,j} \\\\\n&= \\alpha_{i,1}\\lambda_{1,j}\n+ \\dots\n+ \\alpha_{i,r}\\lambda_{r,j}.\n\\end{aligned}\n\\] Nesse sentido, as cargas têm uma dupla interpretação:\n\nnível de associação da variável com aquele fator;\ncorreção de escala, ajustar a escala do fator para a escala da variável resposta.\n\nAmbas interpretações são apropriadas: uma carga mais alta não necessariamente significa uma maior associação entre variável e fator (pode decorrer de um ajuste de escala), mas uma carga baixa em valor absoluto significa necessariamente uma falta de associação entre eles.\n\nCriando grupos via prioris informativas\n\n\n\n\n\n\nModelo confirmatório\n\n\n\n\n\n\n\nModelo semi-confirmatório\n\n\n\n\n\n\n\n\n\n\n\nNotaUm classificador fatorial\n\n\n\nO modelo semi-confirmatório é (também) um modelo de classificação\n\n\n\n\n\n\n\n\nModelo confirmatório\n\n\n\n\n\n\n\nModelo semi-confirmatório\n\n\n\n\n\n\nAplicação com dados de temperatura (modelo confirmatório por regiões do país, modelo semi-confirmatório por altitude)\n\n\n\n\n\n\n\nCarvalho, C. M., Chang, J., Lucas, J. E., Nevins, J. R., Wang, Q., & West, M. (2008). High-dimensional sparse factor modeling: Applications in gene expression genomics. J. Am. Stat. Assoc., 103(484), 1438–1456. Informa UK Limited.\n\n\nLopes, H. F. (2014). Modern Bayesian Factor Analysis. Em I. Jeliazkov & X.-S. Yang (Eds.), Bayesian Inference in the Social Sciences (pp. 115–140). Hoboken, NJ: John Wiley & Sons.\n\n\nMayrink, V. D., Panaro, R. V., & Costa, M. A. (2020). Structural equation modeling with time dependence: an application comparing Brazilian energy distributors. AStA Advances in Statistical Analysis. Obtido de https://link.springer.com/article/10.1007/s10182-020-00377-2",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Modelos básicos</span>"
+    ]
+  },
+  {
+    "objectID": "qmd/dependencia.html",
+    "href": "qmd/dependencia.html",
+    "title": "3  Aplicação 1: dependência",
+    "section": "",
+    "text": "Mayrink, Panaro, & Costa (2020) apresenta como o modelo CAR pode ser usado para criar estruturas de dependência tanto nas cargas quanto nos escores. O esquema CAR preconiza que se \\(\\{Z(A_i)\\}_i\\) é um Campo Markoviano de forma\n\\[\nZ(A_i) \\mid Z(A_{(-i)}) \\sim\nN\\left(\n\\mu_i + \\sum_{j=1}^n c_{ij}\\big(Z(A_j) - \\mu_j\\big), \\ \\tau_i^2\n\\right),\n\\] Então a estrutura de covariância de \\(Z = \\bigr(\\ Z(A_1), \\dots, Z(A_n) \\ \\bigr)\\) é dada por\n\\[\\text{Cov}(Z) = \\bigr[D(W) - \\rho W\\bigr]^{-1},\\] em que \\(W\\) é a matriz de vizinhanças e \\(D(W)\\) uma matriz diagonal com as somas das linhas de \\(W\\) e \\(\\rho\\) depende das escolhas dee \\(c_{ij}\\) e é tal que \\(|\\rho|&lt;1\\).\n\\[\n(\\alpha_{\\emptyset_k}, \\alpha_{0k})^T \\sim\n\\text{Normal}_n\\big(0, B_k\\big),\n\\quad\nB_k =\n\\begin{bmatrix}\nB_{k,11} & B_{k,12} \\\\\nB_{k,21} & B_{k,22}\n\\end{bmatrix}.\n\\]\n\\[\\alpha_{\\emptyset k} \\mid \\alpha_{0k}\\ \\sim\\\nN_{|G_k \\cup G_E|} \\big( 0, B_{\\emptyset k} \\big),\\]\nem que \\(B_{\\emptyset k} = B_{k,11} - B_{k,12} B_{k,22}^{-1} B_{k,21}\\) e \\(G_k\\) e \\(G_E\\) é o conjunto de índices das variáveis associadas aos grupos \\(k\\) e extra, respectivamente.\nOs escores da aplicação de Mayrink et al. (2020) representam anos. Os autores fazem uma estrutura de vizinhança entre os tempos de modo que \\(t_i\\) é vizinho de \\(t_{i-1}\\) e \\(t_{i+1}\\).\n\\[\\lambda_{i, \\cdot} \\sim N_m\\Bigr(0, v_\\lambda \\bigr[ D(W_\\lambda) - \\rho_\\lambda W_\\lambda \\bigr]^{-1}\\Bigr).\\] \\(v_\\lambda\\) é adicionado por questões de identificabilidade, de modo a controlar os elementos da diagonal da matriz CAR.\n\n\n\n\nCarvalho, C. M., Chang, J., Lucas, J. E., Nevins, J. R., Wang, Q., & West, M. (2008). High-dimensional sparse factor modeling: Applications in gene expression genomics. J. Am. Stat. Assoc., 103(484), 1438–1456. Informa UK Limited.\n\n\nLopes, H. F. (2014). Modern Bayesian Factor Analysis. Em I. Jeliazkov & X.-S. Yang (Eds.), Bayesian Inference in the Social Sciences (pp. 115–140). Hoboken, NJ: John Wiley & Sons.\n\n\nMayrink, V. D., Panaro, R. V., & Costa, M. A. (2020). Structural equation modeling with time dependence: an application comparing Brazilian energy distributors. AStA Advances in Statistical Analysis. Obtido de https://link.springer.com/article/10.1007/s10182-020-00377-2",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Aplicação 1: dependência</span>"
+    ]
+  },
+  {
+    "objectID": "qmd/genes.html",
+    "href": "qmd/genes.html",
+    "title": "4  Aplicação 2: regularização",
+    "section": "",
+    "text": "Carvalho et al. (2008) apresenta uma proposta de prioris regularizadoras para as cargas.\n\\[\n\\alpha_{g,j}\n\\sim (1-\\pi_{g,j})\\delta_0(\\alpha_{g,j})\n+ \\pi_{g,j}\\,\\text{Normal}(\\alpha_{g,j}\\mid 0,\\tau_j),\n\\] \\[\n\\pi_{g,j}\n\\sim (1-\\rho_j)\\delta_0(\\pi_{g,j})\n+ \\rho_j\\,\\text{Beta}\\!\\left(\\pi_{g,j}\\mid a_jm_j,\\,\na_j(1-m_j)\\right).\n\\]\n\n\n\nBreast cancer hormonal pathways. Skeleton of the fitted model for the 250 selected genes and 12 factors. (a) Binary heatmap of thresholded approximate posterior loading probabilities, \\(\\mathbf{1}(\\hat{\\pi}_{g,j}&gt;0.99)\\). (b) Heatmap of approximate posterior means of significant gene–factor loadings, \\(\\hat{\\alpha}_{g,j}\\).\n\n\n\n\n\n\nCarvalho, C. M., Chang, J., Lucas, J. E., Nevins, J. R., Wang, Q., & West, M. (2008). High-dimensional sparse factor modeling: Applications in gene expression genomics. J. Am. Stat. Assoc., 103(484), 1438–1456. Informa UK Limited.\n\n\nLopes, H. F. (2014). Modern Bayesian Factor Analysis. Em I. Jeliazkov & X.-S. Yang (Eds.), Bayesian Inference in the Social Sciences (pp. 115–140). Hoboken, NJ: John Wiley & Sons.\n\n\nMayrink, V. D., Panaro, R. V., & Costa, M. A. (2020). Structural equation modeling with time dependence: an application comparing Brazilian energy distributors. AStA Advances in Statistical Analysis. Obtido de https://link.springer.com/article/10.1007/s10182-020-00377-2",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Aplicação 2: regularização</span>"
+    ]
+  }
+]
