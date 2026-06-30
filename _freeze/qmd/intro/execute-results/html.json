@@ -1,0 +1,17 @@
+{
+  "hash": "6ae12a12bd3e02c6de48985b3cd8cc4e",
+  "result": {
+    "engine": "knitr",
+    "markdown": "# Modelos básicos\n\n## Análise fatorial exploratória\n\nNo modelo de AFE, assumimos que\n\n$$X = \\alpha \\lambda + \\epsilon$$\nou, equivalentemente,\n\n$$X_{i,j}|\\{\\alpha, \\lambda, \\sigma^2\\} \\sim \\text{Normal}(\\alpha_i \\lambda_j, \\sigma_i^2)$$  \n\n* $X \\in \\mathbb R^{n \\times m}$ é a matriz de observações;\n* $\\alpha \\in \\mathbb R^{n \\times r}$ é a matriz das cargas;\n* $\\lambda \\in \\mathbb R ^{r \\times m}$ é a matriz de escores;\n* $\\epsilon \\in \\mathbb R^{n \\times m}$ é a componente estocástica do modelo, em que assumimos que $\\epsilon_{i,j} \\sim N(0, \\sigma^2_i)$ independentes e escrevemos $\\sigma^2 = (\\sigma^2_1, \\dots, \\sigma^2_n)'$.\n\n::: {.callout-note}\nEmbora estejamos assumindo normalidade nos exemplos dessa seção, outras distribuições podem ser usadas para escrever a verossimilhança do nosso modelo. Nesse sentido (e analogamente aos MLGs), poderíamos ter algo do tipo\n\n$$X_{i,j}|\\{\\alpha, \\lambda, \\sigma^2\\} \\sim FE\\Bigr(\\ g(\\alpha_i \\lambda_j); \\ \\phi_i\\ \\Bigr),$$\n\nem que $FE$ é alguma distribuição da família exponencial, $\\phi$ é um parâmetro de locação/escala e $g$ uma função de ligação que faça sentido. Outra razão\n\n:::\n\n\n\n### Identificabilidade .{unnumbered}\n\nAssim como seu análogo frequentista, o modelo acima padece de falta de identificabilidade. Isso ocorre pois $\\alpha\\lambda = \\alpha QQ^\\top\\lambda$ para qualquer $Q$ ortogonal. Um exemplo de como isso pode afetar a inferência da distribuição posteriori é mostrado abaixo.\n\n```stan\ndata {\n  int n;\n  vector[n] x;\n  real mu_b;\n}\nparameters {\n  real<lower=0> a;\n  real b;\n}\nmodel {\n  x ~ normal(a*b, 1);\n  a ~ normal(0, 1);\n  b ~ normal(mu_b, 1);\n}\n```\n\n\n\n::: {.cell}\n\n:::\n\n\n\n\n::: {.cell layout-ncol=\"2\"}\n\n```{.r .cell-code  code-fold=\"true\"}\nmod = readRDS(here::here(\"modIdent.rds\"))\n\nset.seed(12345)\n\nx = rnorm(100, 1)\n\nout = capture.output({\n  rstan::sampling(mod, data = list(n = length(x), x = x, mu_b = 0), chains = 1, seed = 12345) |>\n    rstan::extract(pars = c(\"a\", \"b\"), permuted = FALSE) |>\n    drop() |>\n    plot(main = \"posterior a partir de prioris iguais\")\n  })\n```\n\n::: {.cell-output-display}\n![](intro_files/figure-html/unnamed-chunk-2-1.png){width=672}\n:::\n\n```{.r .cell-code  code-fold=\"true\"}\nout = capture.output({\n  rstan::sampling(mod, data = list(n = length(x), x = x, mu_b = 100), chains = 1, seed = 12345) |>\n    rstan::extract(pars = c(\"a\", \"b\"), permuted = FALSE) |>\n    drop() |>\n    plot(main = \"posterior a partir de prioris informativas\")\n  })\n```\n\n::: {.cell-output-display}\n![](intro_files/figure-html/unnamed-chunk-2-2.png){width=672}\n:::\n:::\n\n\nNo simples exemplo acima não tivemos problema de convergência das cadeias\n\nEmbora o modelo descrito acima\n\n::: {.callout-tip}\n#### $a$ ou $-a$?\n\nThis is an example of a callout with a title.\n:::\n\n\n\n## Modelos confirmatório e semi-confirmatório\n\n",
+    "supporting": [
+      "intro_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

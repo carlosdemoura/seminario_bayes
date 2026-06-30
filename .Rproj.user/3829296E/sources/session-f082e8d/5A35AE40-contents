@@ -1,0 +1,696 @@
+\documentclass{beamer}
+
+%-----------------------------
+% Pacotes essenciais
+\usepackage[utf8]{inputenc}      % Codificação UTF-8
+\usepackage[T1]{fontenc}         % Codificação de fonte
+\usepackage[brazil]{babel}       % Língua portuguesa
+\usepackage{graphicx}            % Inserção de imagens
+\usepackage{booktabs}            % Tabelas com linhas top/mid/bottom
+\usepackage{amsmath, amssymb}    % Símbolos e ambientes matemáticos
+\usepackage{hyperref}            % Links e URLs clicáveis
+\usepackage{caption}             % Controle de legendas
+\usepackage{subcaption}          % Subfiguras (opcional para gráficos lado a lado)
+\usepackage{geometry}            % Ajuste de margens (opcional)
+\usepackage{color,xcolor}        % Controle de cores
+\usepackage{enumitem}            % Controle avançado de listas
+\usepackage{setspace}            % Espaçamento de linhas (como onehalfspacing)
+\usepackage{amsfonts}            % Fontes matemáticas adicionais
+
+%-----------------------------
+% Pacotes Beamer específicos
+\usepackage{tikz}                % Desenhos e diagramas
+\usetikzlibrary{positioning}     % Auxílio em posicionamento de nós
+\usepackage{multicol}            % Colunas múltiplas (se necessário)
+
+%-----------------------------
+% Opcional: melhoria estética para tabelas
+\usepackage{longtable}           % Tabelas longas
+\usepackage{array}               % Controle avançado de colunas
+\usepackage{multirow}            % Mesclar linhas em tabelas
+
+
+\usetheme{Madrid} % ou outro tema de sua preferência
+
+\usepackage[backend=biber,style=authoryear]{biblatex}
+\addbibresource{bib.bib}
+
+\title{Análise fatorial}
+\author{Carlos de Moura}
+\institute{UFMG}
+\date{2025}
+
+
+\usetikzlibrary{shadows}
+\begin{document}
+
+\begin{frame}[plain] % remove cabeçalho e rodapé
+    \vspace{1cm} % espaço superior
+    \centering
+
+    \begin{tikzpicture}
+        \node[draw=blue!70, fill=blue!90, rounded corners=6pt, drop shadow, text width=0.8\textwidth, align=center, minimum height=1.2cm] 
+        {\color{white}\Large \textbf{Análise fatorial semi-confirmatória e algumas aplicações}};
+    \end{tikzpicture}
+    \\[1cm]
+
+    {\large Autor: Carlos Moura \\ Orientador: Vinícius Mayrink}\\[0.5cm]
+    {\large UFMG}\\[0.5cm]
+    {\small 6 de outubro de 2025}
+\end{frame}
+
+
+%-------------------------------------------
+%             PARTE 1
+%-------------------------------------------
+
+
+%-------------------------------------------
+\begin{frame}{Introdução}
+Iniciação Científica realizada por 
+\textbf{Luan Carlos Barros de Moura} sob orientação do Prof. Dr. 
+\textbf{Vinícius Diniz Mayrink} (DEST--UFMG). \textit{Trabalho realizado com bolsa PIBIC/CNPq--UFMG.}
+
+\begin{itemize}
+  \item Estudos sobre modelos de \textbf{Análise Fatorial} no paradigma da \textbf{Inferência Bayesiana}.
+  \item Softwares utilizados: \texttt{R} e \texttt{STAN}.
+  \item Scripts e materiais disponíveis em: 
+  \url{https://github.com/carlosdemoura/2024_relatorio_ic}.
+\end{itemize}
+\end{frame}
+
+%-------------------------------------------
+\begin{frame}{Análise Fatorial}
+\begin{itemize}
+  \item Técnica multivariada que resume informações de várias variáveis observadas
+  em fatores latentes.
+  \item Estrutura: alta correlação dentro de grupos, baixa entre grupos.
+  \item Modelos frequentistas: estimação via máxima verossimilhança (ex.: \cite{johnson}). Baseia-se na verossimilhança e na Lei dos Grandes Números
+  \item Modelos bayesianos: flexíveis, no nosso caso dependem apenas da normalidade dos dados. Usa o Teorema de Bayes para atualizar crenças com informações a priori.
+  (\cite{lopes2004}, \cite{mayrink2020}).
+\end{itemize}
+\end{frame}
+
+
+%-------------------------------------------
+\begin{frame}{Histórico e aplicações}
+\begin{itemize}
+  \item Origem: Spearman (1904) --- fator $g$ na Psicologia.
+  \item Consolidação: décadas de 1940–1950.
+  \item Avanço Bayesiano: desde os anos 1990, com MCMC e maior poder computacional.
+\end{itemize}
+
+\begin{block}{Exemplo}
+\cite{mayrink2020}: análise da performance de distribuidoras de energia
+com modelos fatoriais bayesianos e estrutura temporal.
+\end{block}
+\end{frame}
+
+
+%-------------------------------------------
+\begin{frame}{Resumo das próximas seções}
+\begin{itemize}
+  \item Especificações metodológicas dos modelos bayesianos fatoriais.
+  \item Estudo de Monte Carlo com dados simulados.
+  \item Aplicações em dados reais de temperatura. Dados do INMET: temperatura máxima semanal em 2023 (aproximadamente 500 estações meteorológicas automáticas no Brasil).
+  \item Predição de dados faltantes.
+  \item Conclusões gerais.
+\end{itemize}
+\end{frame}
+% ---------------------------
+
+
+%-------------------------------------------
+%             PARTE 2
+%-------------------------------------------
+\begin{frame}{Descrição dos Modelos Bayesianos}
+\small
+Baseado em \cite{mayrink2020}, \cite{oliveira2024}:  
+\begin{itemize}
+    \item Análise fatorial confirmatória e semi-confirmatória.  
+    \item Inclusão de estruturas de dependência espacial e temporal.  
+    \item Dados: matriz $X$ ($i =$ localidade, $j =$ tempo).  
+    \item Modelo: $X_{i,j} \sim N(\alpha_i \lambda_j, \sigma_i^2)$.  
+\end{itemize}
+\end{frame}
+
+% ---------------------------
+\begin{frame}{Análise fatorial exploratória e confirmatória}
+\begin{equation*}
+X = \alpha \lambda + \epsilon
+\end{equation*}
+
+\begin{itemize}
+    \item $X$: matriz de observações.  
+    \item $\alpha$: cargas (loadings).  
+    \item $\lambda$: escores (scores).  
+    \item $\epsilon$: ruído $\sim N(0,\sigma^2)$.  
+\end{itemize}
+\end{frame}
+
+
+% ---------------------------
+\begin{frame}{Identificação e prioris}
+\begin{itemize}
+    \item Problema: $\alpha \lambda = \alpha Q Q^T \lambda$.  
+    \item Solução: prioris informativas.  
+\end{itemize}
+\pause
+\begin{block}{Exemplo de prioris}
+\begin{align*}
+\alpha &\sim N_n(0, V_\alpha) \\
+\lambda &\sim N_m(0, v_\lambda) \\
+\sigma^2 &\sim \text{Gama}(a,b)
+\end{align*}
+\end{block}
+\end{frame}
+
+% ---------------------------
+\begin{frame}{Análise fatorial semi-confirmatória}
+\begin{itemize}
+    \item Grupos adicionais $G_e$ (não associados a priori).  
+    \item Entradas de $\alpha$ com variâncias altas $\Rightarrow$ modelo aprende associação.  
+\end{itemize}
+
+\begin{figure}
+\includegraphics[width=0.5\textwidth]{img/cap2_var_alpha_2.png}
+\caption{Estrutura semi-confirmatória}
+\end{figure}
+\end{frame}
+
+% ---------------------------
+\begin{frame}{Dependência espacial: modelos CAR}
+\scriptsize
+\[
+Z(A_i) \mid Z(A_{-i}) \sim N\left(\mu_i + \sum_{j} c_{ij}(Z(A_j)-\mu_j), \tau_i^2\right)
+\]
+
+\[
+\Sigma = \bigl[D(W)-\rho W\bigr]^{-1}
+\]
+
+\begin{itemize}
+    \item $W$: matriz de vizinhança.  
+    \item $\rho$: grau de associação.  
+    \item Usado em $\alpha$ para capturar dependência espacial.  
+\end{itemize}
+\end{frame}
+
+% ---------------------------
+\begin{frame}{Dependência temporal nos fatores}
+\[
+\lambda_{i,\bullet} \sim N_m\left(0, v_\lambda [D(W_\lambda) - \rho_\lambda W_\lambda]^{-1}\right)
+\]
+
+\begin{itemize}
+    \item Estrutura AR(1) $\approx$ CAR temporal.  
+    \item Captura correlação entre tempos consecutivos.  
+\end{itemize}
+\end{frame}
+
+% ---------------------------
+\begin{frame}{Conclusão}
+\begin{itemize}
+    \item Modelos exploratórios: flexíveis, mas pouco informativos.  
+    \item Modelos confirmatórios: exigem conhecimento a priori.  
+    \item Modelos semi-confirmatórios: equilíbrio entre flexibilidade e rigidez.  
+    \item Dependência espacial (CAR) e temporal (AR(1)/CAR) enriquecem a análise.  
+    \item Distribuições posteriores $\Rightarrow$ MCMC.  
+\end{itemize}
+\end{frame}
+
+%-------------------------------------------
+%             PARTE 3
+%-------------------------------------------
+
+%---------------------------------------
+\begin{frame}{Introdução}
+\begin{itemize}
+    \item Estudos com dados simulados permitem verificar a qualidade das previsões de modelos estatísticos.
+    \item Estratégia:
+    \begin{enumerate}[label=(\roman*)]
+        \item Escolher valores reais dos parâmetros.
+        \item Gerar dados via verossimilhança.
+        \item Avaliar se estimativas posteriores aproximam os valores reais.
+    \end{enumerate}
+    \item Aplicação: modelos exploratório, confirmatório e semi-confirmatório.
+    \item Métricas principais:
+    \begin{itemize}
+        \item Cobertura HPD (\% de intervalos contendo o valor real).
+        \item Viés relativo dos estimadores pontuais.
+        \item Amplitude média dos intervalos HPD.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+%---------------------------------------
+\begin{frame}{Esquema de Geração de Dados}
+\begin{enumerate}[label=(\roman*)]
+    \item Sorteio de 100 coordenadas uniformes no globo.
+    \item Atribuição de grupos (modelos confirmatório e semi-confirmatório).
+    \item Geração de parâmetros a partir das priors:
+    \[
+        V_\alpha = 400, \quad V_\lambda = 1, \quad \rho_\alpha = \rho_\lambda = 0.95, \quad a = b = 1
+    \]
+    \item Valores de $\lambda$ positivos para contornar identificação.
+    \item Tesselação de Voronoi para matriz de vizinhança.
+    \item Dados simulados via modelo \ref{prior:model}, com $n=100$, $m=30$.
+\end{enumerate}
+\end{frame}
+
+%---------------------------------------
+\begin{frame}{Resultados Monte Carlo (Boxplots)}
+\begin{figure}
+\centering
+\begin{subfigure}{0.25\textwidth}
+    \includegraphics[width=\linewidth]{img/cap3_mc_p.png}
+    \caption{Cobertura HPD}
+\end{subfigure}
+\begin{subfigure}{0.25\textwidth}
+    \includegraphics[width=\linewidth]{img/cap3_mc_hpd_amp.png}
+    \caption{Amplitude HPD}
+\end{subfigure}
+\begin{subfigure}{0.25\textwidth}
+    \includegraphics[width=\linewidth]{img/cap3_mc_vr.png}
+    \caption{Viés Relativo}
+\end{subfigure}
+\begin{subfigure}{0.2\textwidth}
+    \includegraphics[width=\linewidth]{img/cap3_mc_vr_pie.png}
+    \caption{Melhor Estimador}
+\end{subfigure}
+\end{figure}
+\end{frame}
+
+%---------------------------------------
+\begin{frame}{Estudo Modelo Exploratórios}
+\begin{itemize}
+    \item Um fator, 465 observações, 52 tempos.
+    \item Cobertura média: 96\%.
+    \item Interpretação:
+    \begin{itemize}
+        \item Alta cobertura + HPDs curtos = boas estimativas.
+        \item $\sigma^2$: entradas com variância maior possuem HPDs mais amplos.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+%---------------------------------------
+\begin{frame}{Modelo Confirmatório}
+\begin{itemize}
+    \item Dados agrupados em 5 grupos.
+    \item Cobertura média: 97.5\%.
+    \item Observações:
+    \begin{itemize}
+        \item Apenas linhas associadas ao fator apresentam cargas distintas de zero.
+        \item Média posterior aproxima bem as cargas reais.
+        \item HPDs razoáveis para $\lambda$ e fatores.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+%---------------------------------------
+\begin{frame}{Modelo Semi-confirmatório}
+\begin{itemize}
+    \item Dois fatores, 394 observações em 3 grupos.
+    \item Cobertura média: 96.4\%.
+    \item Grupo extra permite cargas livres de zero.
+    \item Interpretação semelhante ao confirmatório, mas com mais flexibilidade nos fatores.
+\end{itemize}
+\end{frame}
+
+%---------------------------------------
+%\begin{frame}{Má Especificação do Modelo}
+%\begin{itemize}
+%    \item Cenários simulados:
+%    \begin{enumerate}
+%        \item Dados de 1 fator, ajustado modelo de 2 fatores (confirmatório ou semi-confirmatório).
+%        \item Dados de 2 fatores, ajustado modelo de 1 fator.
+%        \item Dados com cargas muito grandes fora da priori.
+%    \end{enumerate}
+%    \item Observações:
+%    \begin{itemize}
+%        \item Estimativas de fatores podem se tornar similares.
+%        \item Modelos lidam bem com escores, mas cargas podem ter HPDs ampliados.
+%        \item Priors inadequadas podem inflar HPDs ou superestimar escores.
+%    \end{itemize}
+%\end{itemize}
+%\end{frame}
+
+%---------------------------------------
+\begin{frame}{Conclusões}
+\begin{itemize}
+    \item Cobertura e amplitude HPD indicam bons resultados para os três modelos.
+    \item Moda e mediana tendem a ser estimadores pontuais mais robustos.
+    \item Modelos confirmatório e semi-confirmatório permitem controle mais preciso sobre fatores específicos.
+    \item Alguns estudos de má especificação do modelo foram conduzidos.
+\end{itemize}
+\end{frame}
+
+
+
+%-------------------------------------------
+%             PARTE 4
+%-------------------------------------------
+
+%---------------------------------------
+%\begin{frame}{Introdução}
+%\begin{itemize}
+%    \item Aplicação dos modelos de análise fatorial em dados reais de temperatura máxima no Brasil.
+%    \item Fonte: Instituto Nacional de Meteorologia (INMET), 565 estações, 52 semanas em 2023.
+%    \item Simulações posteriores feitas via STAN com o pacote R \texttt{rstan}.
+%    \item Pacote \texttt{fastan} desenvolvido para automatizar rotinas de análise fatorial e coleta de dados INMET.
+%    \item Modelos ajustados:
+%    \begin{enumerate}
+%        \item Exploratório
+%        \item Confirmatório (5 grandes regiões)
+%        \item Semi-confirmatório (altitudes: altas, baixas, grupo extra)
+%    \end{enumerate}
+%\end{itemize}
+%\end{frame}
+
+%---------------------------------------
+\begin{frame}{Dados de Temperatura}
+\begin{itemize}
+    \item Matriz de dados: 497 estações x 52 semanas.
+    \item 3,3\% de observações faltantes; estações com >40\% de dados faltantes foram excluídas.
+    \item Disponível também: latitude, longitude, altitude e cidade da estação.
+    \item Distribuição por região:
+    \begin{itemize}
+        \item Centro-Oeste: 16,8\%, Nordeste: 25\%, Norte: 15,6\%, Sudeste: 25,8\%, Sul: 16,8\%
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+%---------------------------------------
+\begin{frame}{Visualização das Estações}
+\begin{figure}
+\centering
+\begin{subfigure}{0.45\textwidth}
+    \includegraphics[width=\linewidth]{img/cap4_geral_mapa_estacoes.png}
+    \caption{Mapa do Brasil com estações INMET}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.45\textwidth}
+    \includegraphics[width=\linewidth]{img/cap4_geral_boxplot_alt.png}
+    \caption{Boxplot de altitudes por região}
+\end{subfigure}
+\caption{Distribuição espacial e altitudes das estações automáticas do INMET.}
+\end{figure}
+\end{frame}
+
+%---------------------------------------
+\begin{frame}{Modelo Exploratório: Fator de Temperatura}
+\begin{figure}
+\centering
+\includegraphics[width=7cm]{img/cap4_expl_lambda.png}
+\caption{Média posterior e intervalo HPD do fator de temperatura.}
+\end{figure}
+\begin{itemize}
+    \item Tendência geral: leve crescimento início do ano, queda até semana 25, crescimento até semana 40, platô até fim do ano.
+    \item Semanas atípicas: 39 e 46 com valores máximos.
+    \item Indícios de variabilidade regional não capturada pelo modelo.
+\end{itemize}
+\end{frame}
+
+%---------------------------------------
+\begin{frame}{Modelo Exploratório: Cargas e Variância}
+\begin{figure}
+\centering
+\begin{subfigure}{0.45\textwidth}
+    \includegraphics[width=\linewidth]{img/cap4_expl_alpha.png}
+    \caption{Cargas $\alpha$}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.45\textwidth}
+    \includegraphics[width=\linewidth]{img/cap4_expl_sigma2.png}
+    \caption{Variâncias $\sigma^2$}
+\end{subfigure}
+\caption{Estimativas posteriores das cargas e variâncias.}
+\end{figure}
+\begin{itemize}
+    \item Cargas dividem-se em altas e baixas, Sul tende a cargas menores.
+    \item Variâncias maiores associadas a cidades do Sul.
+    \item Sugestão de existência de outras variáveis latentes.
+\end{itemize}
+\end{frame}
+
+%---------------------------------------
+\begin{frame}{Modelo Confirmatório: Fatores por Região}
+\begin{figure}
+\centering
+\begin{subfigure}{0.3\textwidth}
+    \includegraphics[width=\linewidth]{img/cap4_conf_alpha.png}
+    \caption{Cargas $\alpha$}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.6\textwidth}
+    \includegraphics[width=\linewidth]{img/cap4_conf_lambda.png}
+    \caption{Fatores semana a semana}
+\end{subfigure}
+\caption{Análise fatorial confirmatória por regiões do país.}
+\end{figure}
+\begin{itemize}
+    \item Norte: fatores estáveis; Sul: fatores mais oscilantes.
+    \item Média posterior das cargas indica maior coesão que no modelo exploratório.
+    \item Variância a posteriori menor e mais controlada.
+\end{itemize}
+\end{frame}
+
+%---------------------------------------
+\begin{frame}{Modelo Semi-Confirmatório: Altitudes}
+\begin{figure}
+\centering
+\begin{subfigure}{0.6\textwidth}
+    \includegraphics[width=\linewidth]{img/cap4_sc_alpha1.png}
+    \caption{Cargas $\alpha$ para cidades altas}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.3\textwidth}
+    \includegraphics[width=\linewidth]{img/cap4_sc_contrast2.png}
+    \caption{Matriz de contraste das cargas}
+\end{subfigure}
+\caption{Estimativas posteriores segregadas por altitude.}
+\end{figure}
+\begin{itemize}
+    \item Cidades altas: HPD das cargas acima de zero → fator relevante.
+    \item Grupo extra: maior amplitude HPD, indicando incerteza sobre associação a fatores.
+\end{itemize}
+\end{frame}
+
+%---------------------------------------
+\begin{frame}{Modelo Semi-Confirmatório: Fatores e Distribuição Espacial}
+\begin{figure}
+\centering
+\includegraphics[width=9cm]{img/cap4_sc_lambda.png}
+\caption{Fatores semana a semana segregados por altitude.}
+\end{figure}
+\begin{itemize}
+    \item Cidades altas: mais quentes semanas 5-15, mais frias semanas 20-30.
+    \item Cidades baixas: fator mais suave ao longo do ano.
+    \item Distribuição espacial consistente com geografia do país.
+    \item Variâncias maiores que confirmatório, menores que exploratório.
+\end{itemize}
+\end{frame}
+
+%---------------------------------------
+\begin{frame}{Comparação entre Modelos}
+\begin{itemize}
+    \item Exploratório: bom para visão geral, mas variâncias maiores e fatores únicos não capturam todas as regiões.
+    \item Confirmatório: diferenças regionais evidentes, variâncias mais controladas.
+    \item Semi-confirmatório: destaca impacto da altitude, fatores mais detalhados, variâncias intermediárias.
+    \item Conclusão: modelos múltiplos fatores são necessários para capturar heterogeneidade das temperaturas ao longo do ano.
+\end{itemize}
+\end{frame}
+
+%-------------------------------------------
+%             PARTE 5
+%-------------------------------------------
+
+%-------------------------------------------------------
+\begin{frame}{Contexto}
+\begin{itemize}
+    \item Estudo de dados faltantes no contexto de análise fatorial.
+    \item Dados reais e simulados foram avaliados.
+    \item Método Bayesiano: cada dado faltante segue a distribuição condicional da verossimilhança.
+    \item STAN pode gerar estimativas via \texttt{generated quantities}, mas isso não incorpora incerteza posterior.
+\end{itemize}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{Distribuição dos dados faltantes}
+\begin{columns}
+\column{0.45\textwidth}
+\begin{table}[H]
+\centering
+\begin{tabular}{lcc}
+\toprule
+Região & Freq. Abs. & Freq. Rel. \\
+\midrule
+Centro-Oeste & 9  & 12.68\% \\
+Nordeste     & 30 & 42.25\% \\
+Norte        & 8  & 11.27\% \\
+Sudeste      & 12 & 16.90\% \\
+Sul          & 12 & 16.90\% \\
+\textbf{Total} & \textbf{71} & \textbf{100\%} \\
+\bottomrule
+\end{tabular}
+\caption{Frequência de dados faltantes por região.}
+\end{table}
+
+\column{0.55\textwidth}
+\includegraphics[width=\linewidth]{img/cap5_geral_contrast.png}
+\captionof{figure}{Matriz de contraste: linhas = estações, colunas = semanas.}
+\end{columns}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{Dados simulados: acurácia}
+\begin{table}[H]
+\centering
+\begin{tabular}{lccc}
+\toprule
+Modelo & Acurácia & Viés Relativo & HPD \\
+\midrule
+Exploratório & 0.561 & 0.037 & 7.808 \\
+Confirmatório & 0.513 & 0.032 & 7.102 \\
+Semi-confirmatório & 0.492 & 0.030 & 6.771 \\
+\bottomrule
+\end{tabular}
+\caption{Predição de dados faltantes simulados.}
+\end{table}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{Dados simulados: HPD e variância}
+\begin{columns}
+\column{0.5\textwidth}
+\includegraphics[width=\linewidth]{img/cap5_mcmc_hpd_amp.png}
+\captionof{figure}{Amplitude do HPD para cada dado faltante.}
+\column{0.5\textwidth}
+\includegraphics[width=\linewidth]{img/cap5_mcmc_boxplot.png}
+\captionof{figure}{Boxplot das amplitudes do HPD.}
+\end{columns}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{HPD vs Variância}
+\begin{columns}
+\column{0.5\textwidth}
+\includegraphics[width=\linewidth]{img/cap5_mcmc_hpd_var_real.png}
+\captionof{figure}{Dados reais: HPD médio vs variância.}
+\column{0.5\textwidth}
+\includegraphics[width=\linewidth]{img/cap5_mcmc_hpd_var_simdata.png}
+\captionof{figure}{Dados simulados: HPD médio vs variância.}
+\end{columns}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{Estudo com dados reais: acurácia}
+\begin{table}[H]
+\centering
+\begin{tabular}{lccc}
+\toprule
+Modelo & Acurácia & Viés Relativo & HPD Médio \\
+\midrule
+Exploratório & 89.71\% & 0.34\% & 7.364 \\
+Confirmatório & 88.91\% & 0.13\% & 5.765 \\
+Semi-confirmatório & 89.71\% & -0.56\% & 5.602 \\
+\bottomrule
+\end{tabular}
+\caption{Validação com dados reais.}
+\end{table}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{Conclusões}
+\begin{itemize}
+    \item Alta acurácia em todos os modelos.
+    \item Confirmatório: menor viés relativo.
+    \item Semi-confirmatório: menor amplitude média do HPD.
+    \item Exploratório: maior amplitude do HPD (mais flexível, mais variáveis latentes).
+    \item Alternativa: ignorar dados faltantes para maior eficiência computacional.
+\end{itemize}
+\end{frame}
+
+%-------------------------------------------
+%             PARTE 6
+%-------------------------------------------
+
+%-------------------------------------------------------
+%\begin{frame}{Resumo do trabalho}
+%\begin{itemize}
+%    \item Aplicação de modelos Bayesianos em análise fatorial de dados de temperatura.
+%    \item Inclusão de dependências espaciais e temporais via hiperparâmetros das priors.
+%    \item Ajuste de três modelos para dados reais e estudos com dados simulados:
+%    \begin{enumerate}
+%        \item Exploratório
+%        \item Confirmatório (por regiões)
+%        \item Semi-confirmatório (por altitude)
+%    \end{enumerate}
+%\end{itemize}
+%\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{Modelo Exploratório}
+\begin{itemize}
+    \item Captura padrões gerais de variação das temperaturas.
+    \item Altitude influencia a dispersão das cargas.
+    \item Altas variâncias indicam possíveis fatores latentes não modelados.
+\end{itemize}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{Modelo Confirmatório}
+\begin{itemize}
+    \item Segrega estações por regiões (Norte, Sul, etc.).
+    \item Ajuste mais coeso e controle da inflação da variância posterior.
+    \item Baixo viés relativo nas predições.
+\end{itemize}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{Modelo Semi-Confirmatório}
+\begin{itemize}
+    \item Divide estações por altitude.
+    \item Cidades altas apresentam comportamento extremo.
+    \item Variabilidade nas cidades intermediárias sugere fatores latentes adicionais.
+    \item Menores amplitudes de HPD nos dados faltantes.
+\end{itemize}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{Comparativo de desempenho}
+\begin{itemize}
+    \item Predição de dados faltantes:
+    \begin{itemize}
+        \item Confirmatório: menor viés relativo.
+        \item Semi-confirmatório: menores amplitudes de HPD.
+        \item Exploratório: pior desempenho comparativo, mas ainda com métricas altas.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+%-------------------------------------------------------
+%\begin{frame}{Trabalhos futuros}
+%\begin{enumerate}
+%    \item Inclusão de efeitos aleatórios para sazonalidade e espacialidade.
+%    \item Avaliar métodos alternativos de aproximação da distribuição posterior (ex: INLA).
+%    \item Implementação de esquemas MCMC próprios:
+%        \begin{itemize}
+%            \item Amostragem em blocos para reduzir autocorrelação.
+%            \item Reversible-jump MCMC para seleção de modelos.
+%            \item Técnicas de seleção de modelos a posteriori.
+%        \end{itemize}
+%\end{enumerate}
+%\end{frame}
+
+%-------------------------------------------
+%             REFERENCIAS
+%-------------------------------------------
+
+%-------------------------------------------
+
+\begin{frame}[allowframebreaks]{Referências}
+\printbibliography
+\end{frame}
+\end{document}

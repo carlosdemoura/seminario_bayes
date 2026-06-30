@@ -1,0 +1,22 @@
+# Aplicação 2: regularização
+
+@carvalho2008 apresenta uma proposta de prioris regularizadoras para as cargas.
+
+$$
+\alpha_{g,j}
+\sim (1-\pi_{g,j})\delta_0(\alpha_{g,j})
++ \pi_{g,j}\,\text{Normal}(\alpha_{g,j}\mid 0,\tau_j),
+$$
+$$
+\pi_{g,j}
+\sim (1-\rho_j)\delta_0(\pi_{g,j})
++ \rho_j\,\text{Beta}\!\left(\pi_{g,j}\mid a_jm_j,\,
+a_j(1-m_j)\right).
+$$
+
+
+::: {#fig-breast-pathways}
+
+![Breast cancer hormonal pathways. Skeleton of the fitted model for the 250 selected genes and 12 factors. (a) Binary heatmap of thresholded approximate posterior loading probabilities, $\mathbf{1}(\hat{\pi}_{g,j}>0.99)$. (b) Heatmap of approximate posterior means of significant gene--factor loadings, $\hat{\alpha}_{g,j}$.](../img/genes_loadings.png)
+
+:::

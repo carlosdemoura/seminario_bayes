@@ -1,0 +1,31 @@
+# Aplicação 1: dependência
+
+## Incluindo estruturas de dependência
+
+$$
+Z(A_i) \mid Z(A_{(-i)}) \sim 
+N\left(
+\mu_i + \sum_{j=1}^n c_{ij}\big(Z(A_j) - \mu_j\big), \ \tau_i^2
+\right)
+$$
+
+$$\text{Cov}(Z) = \bigr[D(W) - \rho W\bigr]^{-1}$$
+
+
+$$
+(\alpha_{\emptyset_k}, \alpha_{0k})^T \sim 
+\text{Normal}_{\text{alguma dimensão}}\big(0, B_k\big),
+\quad
+B_k =
+\begin{bmatrix}
+B_{k,11} & B_{k,12} \\
+B_{k,21} & B_{k,22}
+\end{bmatrix}.
+$$
+
+$$\alpha_{\emptyset k} \mid \alpha_{0k}\ \sim\ 
+N_{|G_k \cup G_E|} \big( 0, B_{\emptyset k} \big),$$
+
+em que $B_{\emptyset k} = B_{k,11} - B_{k,12} B_{k,22}^{-1} B_{k,21}$ e $G_k$ e $G_E$ é o conjunto de índices das variáveis associadas aos grupos $k$ e extra, respectivamente.
+
+$$\lambda_{i, \cdot} \sim N_m\Bigr(0, v_\lambda \bigr[ D(W_\lambda) - \rho_\lambda W_\lambda \bigr]^{-1}\Bigr).$$

@@ -1,0 +1,23 @@
+{
+  "index.qmd": {
+    "index.html": "b223d098"
+  },
+  "qmd/intro.qmd": {
+    "intro.html": "fc130d1d"
+  },
+  "qmd/references.qmd": {
+    "references.html": "e8bb4e57"
+  },
+  "qmd/basics.qmd": {
+    "basics.html": "5d778967"
+  },
+  "qmd/energia.qmd": {
+    "energia.html": "be850a44"
+  },
+  "qmd/genes.qmd": {
+    "genes.html": "c73678a0"
+  },
+  "qmd/dependencia.qmd": {
+    "dependencia.html": "920dfa15"
+  }
+}

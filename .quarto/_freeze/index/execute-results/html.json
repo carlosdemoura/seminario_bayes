@@ -1,0 +1,15 @@
+{
+  "hash": "4f89ea5a35fde083b7d4e45b2dd4ecd9",
+  "result": {
+    "engine": "knitr",
+    "markdown": "<!--\n::: {style=\"text-align: right\"}\n\"Por isso minha voz esconde outra<br>\nQue em suas dobras desenvolve outra<br>\nOnde em forma de som perdeu-se o Canto<br>\nQue eu sei Aonde mas não ouço ouvir.\"<br>\nAugusto de Campos\n:::\n-->\n# Sobre\n\nEste é o [material auxiliar](https://github.com/multivariada-ufmg/seminario_bayes) do seminário de Tópicos Especiais em Estatística: Estatística Multivariada (DEST-UFMG, 2026/1, EST 865).\nO tema é análise fatorial Bayesiana, em específico algumas aplicações vistas na literatura.\nEste [quarto book](https://quarto.org/) está dividido da seguinte forma:\n\n* Introdução dos modelos mais básicos, e identificabilidade;\n* Introdução de dependência entre os parâmetros;\n* Seleção de modelos via prioris regularizadoras;\n\nUsaremos dados do INMET como um exemplo motivador ao longo do texto. <!-- Alguns pacotes que usaremos estão abaixo listados.\n\n\n::: {.cell}\n\n```{.r .cell-code}\nif (!{\"pak\" %in% rownames(installed.packages())}) install.packages(\"pak\")\n\npak::pak(c(\"matrixcalc\", \"rstan\", \"tidyverse\", \"mvtnorm\", \"ggplot2\", \"boot\"))\n```\n:::\n\n-->\n\n## Motivação\n\nPorquê fazer análise fatorial do jeito Bayesiano?\n\n* ~~porquê é o jeito correto de fazer estatística~~;\n* A inclusão de dependências temporais/espaciais em cargas e fatores ocorre naturalmente via prioris;\n* A regularização de coeficientes também pode ser feita via prioris informativas, o que permite um modelo que faz seleção de fatores;\n* Extensão para um modelo de regressão e análise fatorial.\n\n# Referências {.unnumbered}\n\n::: {#refs}\n:::\n\n\n# Licença {.unnumbered}\n\nEste trabalho está licenciado sob a licença [Creative Commons Atribuição 4.0 Internacional (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/deed.pt-br).\n\n![](https://licensebuttons.net/l/by/4.0/88x31.png){fig-align=\"center\"}",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

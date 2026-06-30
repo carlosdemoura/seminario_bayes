@@ -1,0 +1,49 @@
+<!--
+::: {style="text-align: right"}
+"Por isso minha voz esconde outra<br>
+Que em suas dobras desenvolve outra<br>
+Onde em forma de som perdeu-se o Canto<br>
+Que eu sei Aonde mas não ouço ouvir."<br>
+Augusto de Campos
+:::
+-->
+# Sobre
+
+Este é o [material auxiliar](https://github.com/multivariada-ufmg/seminario_bayes) do seminário de Tópicos Especiais em Estatística: Estatística Multivariada (DEST-UFMG, 2026/1, EST 865).
+O tema é análise fatorial Bayesiana, em específico algumas aplicações vistas na literatura.
+Este [quarto book](https://quarto.org/) está dividido da seguinte forma:
+
+* Introdução dos modelos mais básicos, e identificabilidade;
+* Introdução de dependência entre os parâmetros;
+* Seleção de modelos via prioris regularizadoras;
+
+Usaremos dados do INMET como um exemplo motivador ao longo do texto. <!-- Alguns pacotes que usaremos estão abaixo listados.
+
+```{r}
+#| eval: false
+if (!{"pak" %in% rownames(installed.packages())}) install.packages("pak")
+
+pak::pak(c("matrixcalc", "rstan", "tidyverse", "mvtnorm", "ggplot2", "boot"))
+```
+-->
+
+## Motivação
+
+Porquê fazer análise fatorial do jeito Bayesiano?
+
+* ~~porquê é o jeito correto de fazer estatística~~;
+* A inclusão de dependências temporais/espaciais em cargas e fatores ocorre naturalmente via prioris;
+* A regularização de coeficientes também pode ser feita via prioris informativas, o que permite um modelo que faz seleção de fatores;
+* Extensão para um modelo de regressão e análise fatorial.
+
+# Referências {.unnumbered}
+
+::: {#refs}
+:::
+
+
+# Licença {.unnumbered}
+
+Este trabalho está licenciado sob a licença [Creative Commons Atribuição 4.0 Internacional (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/deed.pt-br).
+
+![](https://licensebuttons.net/l/by/4.0/88x31.png){fig-align="center"}

@@ -1,0 +1,116 @@
+{
+    "sources": [
+        {
+            "DOI": "https://doi.org/10.1198/016214508000000869",
+            "author": [
+                {
+                    "family": "Carvalho",
+                    "given": "Carlos M"
+                },
+                {
+                    "family": "Chang",
+                    "given": "Jeffrey"
+                },
+                {
+                    "family": "Lucas",
+                    "given": "Joseph E"
+                },
+                {
+                    "family": "Nevins",
+                    "given": "Joseph R"
+                },
+                {
+                    "family": "Wang",
+                    "given": "Quanli"
+                },
+                {
+                    "family": "West",
+                    "given": "Mike"
+                }
+            ],
+            "container-title": "J. Am. Stat. Assoc.",
+            "id": "carvalho2008",
+            "issue": "484",
+            "issued": {
+                "date-parts": [
+                    [
+                        2008,
+                        12
+                    ]
+                ]
+            },
+            "page": "1438-1456",
+            "publisher": "Informa UK Limited",
+            "title": "High-dimensional sparse factor modeling: Applications in gene expression genomics",
+            "title-short": "High-dimensional sparse factor modeling",
+            "type": "article-journal",
+            "volume": "103"
+        },
+        {
+            "DOI": "10.1002/9781118735755.ch5",
+            "author": [
+                {
+                    "family": "Lopes",
+                    "given": "Hedibert Freitas"
+                }
+            ],
+            "container-title": "Bayesian inference in the social sciences",
+            "editor": [
+                {
+                    "family": "Jeliazkov",
+                    "given": "Ivan"
+                },
+                {
+                    "family": "Yang",
+                    "given": "Xin-She"
+                }
+            ],
+            "id": "lopes2014",
+            "issued": {
+                "date-parts": [
+                    [
+                        2014
+                    ]
+                ]
+            },
+            "page": "115-140",
+            "publisher": "John Wiley & Sons",
+            "publisher-place": "Hoboken, NJ",
+            "title": "Modern bayesian factor analysis",
+            "type": "chapter"
+        },
+        {
+            "DOI": "10.1007/s10182-020-00377-2",
+            "URL": "https://link.springer.com/article/10.1007/s10182-020-00377-2",
+            "author": [
+                {
+                    "family": "Mayrink",
+                    "given": "Vinícius Diniz"
+                },
+                {
+                    "family": "Panaro",
+                    "given": "Renato Valladares"
+                },
+                {
+                    "family": "Costa",
+                    "given": "Marcelo Azevedo"
+                }
+            ],
+            "container-title": "AStA Advances in Statistical Analysis",
+            "id": "mayrink2020",
+            "issued": {
+                "date-parts": [
+                    [
+                        2020
+                    ]
+                ]
+            },
+            "title": "Structural equation modeling with time dependence: An application comparing brazilian energy distributors",
+            "title-short": "Structural equation modeling with time dependence",
+            "type": "article-journal"
+        }
+    ],
+    "project_biblios": [
+        "qmd/references.bib"
+    ]
+}
